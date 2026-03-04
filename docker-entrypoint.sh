@@ -16,5 +16,12 @@ if [ ! -f "$CONFIG_PATH" ]; then
   echo "Missing required config file at $CONFIG_PATH" >&2
   exit 1
 fi
+
+# Start Samba
+smbd --no-process-group --daemon
+echo "Samba started" >&2
+
+# Start health monitor
 python3 /app/scripts/health-monitor.py &
+
 exec /usr/local/bin/gostream "$SOURCE_PATH" "$MOUNT_PATH"
