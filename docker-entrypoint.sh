@@ -3,7 +3,11 @@ set -eu
 CONFIG_PATH="${MKV_PROXY_CONFIG_PATH:-/config.json}"
 SOURCE_PATH="${GOSTREAM_SOURCE_PATH:-/mnt/gostream-mkv-real}"
 MOUNT_PATH="${GOSTREAM_MOUNT_PATH:-/mnt/gostream-mkv-virtual}"
+
 mkdir -p "$SOURCE_PATH" "$MOUNT_PATH"
+mkdir -p /logs
+mkdir -p /usr/local/STATE
+
 if mountpoint -q "$MOUNT_PATH" 2>/dev/null; then
   echo "Stale FUSE mount detected at $MOUNT_PATH, cleaning up..." >&2
   fusermount3 -uz "$MOUNT_PATH" || true
