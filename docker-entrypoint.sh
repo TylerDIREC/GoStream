@@ -12,6 +12,7 @@ if mountpoint -q "$MOUNT_PATH" 2>/dev/null; then
   echo "Stale FUSE mount detected at $MOUNT_PATH, cleaning up..." >&2
   fusermount3 -uz "$MOUNT_PATH" || true
 fi
+
 if [ ! -f "$CONFIG_PATH" ]; then
   echo "Missing required config file at $CONFIG_PATH" >&2
   exit 1
@@ -29,6 +30,11 @@ echo "Waiting for FUSE mount..." >&2
 while ! mountpoint -q "$MOUNT_PATH" 2>/dev/null; do
   sleep 1
 done
+
+# Fix permissions on virtual mount
+echo "Fixing permissions..." >&2
+chmod -R 755 "$MOUNT_PATH" || true
+
 echo "FUSE mount ready, starting Samba..." >&2
 smbd --no-process-group --daemon
 
