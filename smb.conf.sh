@@ -1,0 +1,20 @@
+[global]
+   workgroup = WORKGROUP
+   server string = GoStream
+   log level = 1
+   max log size = 50
+   dns proxy = no
+   # No authentication needed for read-only local network share
+   security = user
+   map to guest = bad user
+   guest account = nobody
+
+[gostream-mkv-virtual]
+   path = /mnt/gostream-mkv-virtual
+   browseable = yes
+   read only = yes
+   guest ok = yes
+   oplocks = no
+   aio read size = 1
+   deadtime = 15
+   vfs objects = fileid
