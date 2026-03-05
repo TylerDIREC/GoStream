@@ -8,6 +8,12 @@ mkdir -p "$SOURCE_PATH" "$MOUNT_PATH"
 mkdir -p /logs
 mkdir -p /usr/local/STATE
 
+# Create NFS mapped groups so FUSE permissions work correctly
+groupadd -g 977 nasmedia 2>/dev/null || true
+groupadd -g 988 docker 2>/dev/null || true
+usermod -aG nasmedia root 2>/dev/null || true
+usermod -aG docker root 2>/dev/null || true
+
 if mountpoint -q "$MOUNT_PATH" 2>/dev/null; then
   echo "Stale FUSE mount detected at $MOUNT_PATH, cleaning up..." >&2
   fusermount3 -uz "$MOUNT_PATH" || true
@@ -30,10 +36,6 @@ echo "Waiting for FUSE mount..." >&2
 while ! mountpoint -q "$MOUNT_PATH" 2>/dev/null; do
   sleep 1
 done
-
-# Fix permissions on virtual mount
-echo "Fixing permissions..." >&2
-chmod -R 755 "$MOUNT_PATH" || true
 
 echo "FUSE mount ready, starting Samba..." >&2
 smbd --no-process-group --daemon
