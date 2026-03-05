@@ -17,11 +17,20 @@ if [ ! -f "$CONFIG_PATH" ]; then
   exit 1
 fi
 
-# Start Samba
-smbd --no-process-group --daemon
-echo "Samba started" >&2
-
 # Start health monitor
 python3 /app/scripts/health-monitor.py &
 
-exec /usr/local/bin/gostream "$SOURCE_PATH" "$MOUNT_PATH"
+# Start GoStream in background, wait for FUSE mount, then start Samba
+/usr/local/bin/gostream "$SOURCE_PATH" "$MOUNT_PATH" &
+GOSTREAM_PID=$!
+
+# Wait for FUSE mount to become active
+echo "Waiting for FUSE mount..." >&2
+while ! mountpoint -q "$MOUNT_PATH" 2>/dev/null; do
+  sleep 1
+done
+echo "FUSE mount ready, starting Samba..." >&2
+smbd --no-process-group --daemon
+
+# Keep container alive by waiting on GoStream
+wait $GOSTREAM_PID
